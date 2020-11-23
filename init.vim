@@ -34,8 +34,38 @@ nnoremap <C-X> :silent !..\debug.bat<CR>
 :nnoremap <A-b> :cN<CR>
 :nnoremap <A-s> <Esc>:wa<CR>:silent call CompileSilent()<CR><C-w>p:q<CR>:cope<CR>
 
+function! Sp(...)
+  if(a:0 == 0)
+    sp
+  else
+    let i = a:0
+    while(i > 0)
+      execute 'let file = a:' . i
+      execute 'sp ' . file
+      let i = i - 1
+    endwhile
+  endif
+endfunction
+com! -nargs=* -complete=file Sp call Sp(<f-args>)
+cab sp Sp %:p:h
+cab e e %:p:h
+
+"function! OpenFullPath()
+"	:cd /
+"	:file %:p
+"	:e %:p
+"	:cd -
+"endfunction
+
 " Make the swap file warnings go away
 " set shortmess+=A
+
+" Write full path in the buffer name, in order to make it work with MSVC
+" quickfix compilation
+"au BufReadPre *.cpp,*.c,*.h,*.hpp cd /
+"au BufReadPost *.cpp,*.c,*.h,*.hpp e %:p
+"au BufWinEnter *.cpp,*.c,*.h,*.hpp call OpenFullPath()
+""au BufAdd *.cpp,*.c,*.h,*.hpp e %:p
 
 :set makeprg=cmd 
 :set splitbelow
@@ -45,6 +75,7 @@ function! CompileSilent()
 	:call setqflist([], 'a', {'tile' : 'MSVC Compilation'})
 	:silent cgete system("pushd \%programfiles(x86)\%\\Microsoft Visual Studio 14.0\\VC & vcvarsall.bat x64 & popd & ..\\build.bat")
 	:silent cc 1
+	:%bd|e#
 	:wa
 	:cl
 endfunction
