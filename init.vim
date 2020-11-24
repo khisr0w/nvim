@@ -3,6 +3,7 @@ let &packpath = &runtimepath
 source ~/.vimrc_temp
 
 " New Configs for Nvim
+cd ~
 
 tnoremap <Esc> <C-\><C-n>
 set clipboard+=unnamedplus
@@ -47,7 +48,7 @@ au BufWinEnter *.cpp,*.c,*.h,*.hpp,*.bat cd %:p:h | cd /
 :set splitright
 function! CompileSilent()
 	:wa
-	:call setqflist([], 'a', {'tile' : 'MSVC Compilation'})
+	:call setqflist([], 'a', {'title' : 'MSVC Compilation'})
 	:cd %:p:h
 	:silent cgete system("pushd \%programfiles(x86)\%\\Microsoft Visual Studio 14.0\\VC & vcvarsall.bat x64 & popd & ..\\build.bat")
 	:cd /
@@ -55,6 +56,32 @@ function! CompileSilent()
 	:wa
 	:cl
 endfunction
+
+function! MakeProj(...)
+	if(a:0 == 0)
+		echoerr "Please provide the name for your project"
+	else
+		execute 'let name = a:1'
+		silent execute '!mkdir ' . name
+		execute 'cd ' . name
+		if(a:0 == 2)
+			execute 'sp ' . a:2
+			silent w
+			q
+		endif
+		echo "++++ Project Successfully Created ++++"
+	endif
+endfunction
+com! -nargs=* -complete=file MakeProj call MakeProj(<f-args>)
+cab makeproj MakeProj
+
+"redir @x
+"echo expand("%:t:r")
+"redir END
+"redir @x>>
+"echo "_"
+"echo expand("%:e")
+"redir END
 
 "function! Sp(...)
 "  if(a:0 == 0)
@@ -69,7 +96,7 @@ endfunction
 "  endif
 "endfunction
 "com! -nargs=* -complete=file Sp call Sp(<f-args>)
-"cab sp Sp %:p:h
+"cab sp Sp
 
 "function! OpenFullPath()
 "	:cd /
