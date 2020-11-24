@@ -27,28 +27,49 @@ hi PmenuSel guibg=#ec524b
 nnoremap <C-S> <Esc>:wa<CR>:call CompileSilent()<CR>
 inoremap <C-S> <Esc>:wa<CR>:call CompileSilent()<CR>
 
-nnoremap <C-X> :silent !..\debug.bat<CR>
+nnoremap <C-X> :silent cd %:p:h<CR>:silent !..\debug.bat<CR>:silent cd /<CR>
 
 " key mapping for the quickfix jumps after compilation
 :nnoremap <A-n> :cn<CR>
 :nnoremap <A-b> :cN<CR>
 :nnoremap <A-s> <Esc>:wa<CR>:silent call CompileSilent()<CR><C-w>p:q<CR>:cope<CR>
 
-function! Sp(...)
-  if(a:0 == 0)
-    sp
-  else
-    let i = a:0
-    while(i > 0)
-      execute 'let file = a:' . i
-      execute 'sp ' . file
-      let i = i - 1
-    endwhile
-  endif
-endfunction
-com! -nargs=* -complete=file Sp call Sp(<f-args>)
-cab sp Sp %:p:h
 cab e e %:p:h
+cab sp sp %:p:h
+cab vsp vsp %:p:h
+cab split split %:p:h
+cab vsplit vsplit %:p:h
+cab E e
+au BufWinEnter *.cpp,*.c,*.h,*.hpp,*.bat cd %:p:h | cd /
+
+:set makeprg=cmd 
+:set splitbelow
+:set splitright
+function! CompileSilent()
+	:wa
+	:call setqflist([], 'a', {'tile' : 'MSVC Compilation'})
+	:cd %:p:h
+	:silent cgete system("pushd \%programfiles(x86)\%\\Microsoft Visual Studio 14.0\\VC & vcvarsall.bat x64 & popd & ..\\build.bat")
+	:cd /
+	:silent cc 1
+	:wa
+	:cl
+endfunction
+
+"function! Sp(...)
+"  if(a:0 == 0)
+"    sp
+"  else
+"    let i = a:0
+"    while(i > 0)
+"      execute 'let file = a:' . i
+"      execute 'sp ' . file
+"      let i = i - 1
+"    endwhile
+"  endif
+"endfunction
+"com! -nargs=* -complete=file Sp call Sp(<f-args>)
+"cab sp Sp %:p:h
 
 "function! OpenFullPath()
 "	:cd /
@@ -66,17 +87,3 @@ cab e e %:p:h
 "au BufReadPost *.cpp,*.c,*.h,*.hpp e %:p
 "au BufWinEnter *.cpp,*.c,*.h,*.hpp call OpenFullPath()
 ""au BufAdd *.cpp,*.c,*.h,*.hpp e %:p
-
-:set makeprg=cmd 
-:set splitbelow
-:set splitright
-function! CompileSilent()
-	:wa
-	:call setqflist([], 'a', {'tile' : 'MSVC Compilation'})
-	:silent cgete system("pushd \%programfiles(x86)\%\\Microsoft Visual Studio 14.0\\VC & vcvarsall.bat x64 & popd & ..\\build.bat")
-	:silent cc 1
-	:%bd|e#
-	:wa
-	:cl
-endfunction
-
