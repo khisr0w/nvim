@@ -5,6 +5,9 @@ source ~/.vimrc_temp
 " New Configs for Nvim
 cd ~
 
+"au VimEnter * jobstart(['pushd F:\dev', '&', 'escToCaps.exe', '&', 'popd'])
+"au VimEnter * jobstart(['cmd.exe', 'ping neovim.io')
+
 tnoremap <Esc> <C-\><C-n>
 set clipboard+=unnamedplus
 "set statusline+=%F
@@ -42,10 +45,13 @@ cab split split %:p:h
 cab vsplit vsplit %:p:h
 cab E e
 au BufWinEnter *.cpp,*.c,*.h,*.hpp,*.bat cd %:p:h | cd /
+au BufNewFile *.cpp,*.c,*.h,*.hpp,*.bat silent w | CNewFileTemplate() | cd %:p:h | cd /
+"echo bufname(1)
 
 :set makeprg=cmd 
 :set splitbelow
 :set splitright
+
 function! CompileSilent()
 	:wa
 	:call setqflist([], 'a', {'title' : 'MSVC Compilation'})
@@ -57,6 +63,68 @@ function! CompileSilent()
 	:cl
 endfunction
 
+function! CNewFileTemplate(...)
+	let @x = ""
+
+	execute 'let filemacro = toupper(expand("%:t:r")) . "_" . toupper(expand("%:e"))'
+	let head = "/*  +======| File Info |===============================================================+"
+	let end = "    +=====================| Sayed Abid Hashimi, Copyright © All rights reserved |======+  */"
+	let pad = "    |                                                                                  |"
+
+	let subd = expand("%:p:h:t")
+	let created = strftime("%c", getftime(expand("%:p")))
+	execute 'let first = "    |    Subdirectory: /" . subd'
+	execute 'let second = "    |    Created at:   " . created'
+	let values = [first, second]
+
+	redir @x>>
+	echo head
+	echo pad
+	redir END
+
+	let item = len(values)
+	execute 'let i = 0'
+	while(i < item)
+		redir @x>>
+
+		let j = len(head) - len(values[i])
+		while(j > 1)
+			execute 'let values[i] = values[i] . " "'
+			let j = j - 01
+		endwhile
+
+		execute 'let values[i] = values[i] . "|"'
+		echo values[i]
+		redir END
+
+		let i = i + 01
+	endwhile
+	redir @x>>
+	echo pad
+	echo end
+	echo ""
+	echo "#if !defined(" . filemacro . ")"
+
+	execute 'let i = 10'
+	while(i > 0)
+		echo ""
+		let i = i - 01
+	endwhile
+
+	echo "#define " . filemacro
+	echo "#endif"
+	redir END
+	execute 'normal gg'
+	execute 'normal "xP'
+	execute 'normal gg'
+	execute 'normal dd'
+	let @x = ""
+	if(a:0 > 0)
+		echo a:1
+	endif
+endfunction
+com! -nargs=* -complete=file CNewFileTemplate call CNewFileTemplate(<f-args>)
+
 function! MakeProj(...)
 	if(a:0 == 0)
 		echoerr "Please provide the name for your project"
@@ -65,12 +133,14 @@ function! MakeProj(...)
 		silent execute '!mkdir ' . name
 		execute 'cd ' . name
 		if(a:0 == 2)
-			execute 'sp ' . a:2
+			if(!empty(bufname()))
+				silent w
+			endif
+			execute 'e ' . a:2
 			silent w
-			q
 		endif
-		echo "++++ Project Successfully Created ++++"
 	endif
+	echo "++++ Project Successfully Created ++++"
 endfunction
 com! -nargs=* -complete=file MakeProj call MakeProj(<f-args>)
 cab makeproj MakeProj
