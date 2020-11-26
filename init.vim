@@ -4,13 +4,15 @@ source ~/.vimrc_temp
 
 " New Configs for Nvim
 cd ~
+cab w wa
+cab WA w
 
 "au VimEnter * jobstart(['pushd F:\dev', '&', 'escToCaps.exe', '&', 'popd'])
 "au VimEnter * jobstart(['cmd.exe', 'ping neovim.io')
 
 tnoremap <Esc> <C-\><C-n>
-set clipboard+=unnamedplus
-"set statusline+=%F
+"set clipboard+=unnamedplus
+set statusline+=%F
 
 hi Pmenu guibg=#504945
 hi PmenuSel guibg=#ec524b
@@ -46,12 +48,37 @@ cab vsplit vsplit %:p:h
 cab E e
 au BufWinEnter *.cpp,*.c,*.h,*.hpp,*.bat cd %:p:h | cd /
 au BufNewFile *.cpp,*.c,*.h,*.hpp,*.bat silent w | CNewFileTemplate() | cd %:p:h | cd /
+au BufWritePre *.cpp,*.c,*.h,*.hpp,*.bat call UpdateFile()
+
 "echo bufname(1)
 
 :set makeprg=cmd 
 :set splitbelow
 :set splitright
 
+function! UpdateFile()
+	let curpos = getcurpos()
+	:0
+	if(search('/\*', 'Wc') == 1)
+		if(search('\(+======.*|.*File.*Info.*|\)', 'W') == 1)
+			if(search('\(Last.*Modified.*:\)', 'W') == 5)
+				if(search('\(|.*Sayed.*Abid.*Hashimi.*,.*Copyright.*©.*All.*rights.*reserved.|\)', 'W') == 7)
+					:0
+					let line = search('\(Last.*Modified.*:\)', 'W')
+					execute 'let text = "    |    Last Modified:  " . strftime("%c", localtime())'
+					let i = 88 - len(text)
+					while(i > 1)
+						execute 'let text = text . " "'
+						let i = i - 01
+					endwhile
+					execute 'let text = text . "|"'
+					silent call setline(line, text)
+				endif
+			endif
+		endif
+	endif
+	call setpos('.', [curpos[0], curpos[1], curpos[2], curpos[3]])
+endfunction
 function! CompileSilent()
 	:wa
 	:call setqflist([], 'a', {'title' : 'MSVC Compilation'})
@@ -64,64 +91,60 @@ function! CompileSilent()
 endfunction
 
 function! CNewFileTemplate(...)
-	let @x = ""
 
 	execute 'let filemacro = toupper(expand("%:t:r")) . "_" . toupper(expand("%:e"))'
+	execute 'let linenum = 1'
 	let head = "/*  +======| File Info |===============================================================+"
-	let end = "    +=====================| Sayed Abid Hashimi, Copyright © All rights reserved |======+  */"
+	silent call appendbufline("", linenum, head)
+	let linenum = linenum + 01
 	let pad = "    |                                                                                  |"
+	silent call appendbufline("", linenum, pad)
+	let linenum = linenum + 01
+	let end = "    +=====================| Sayed Abid Hashimi, Copyright © All rights reserved |======+  */"
 
 	let subd = expand("%:p:h:t")
 	let created = strftime("%c", getftime(expand("%:p")))
-	execute 'let first = "    |    Subdirectory: /" . subd'
-	execute 'let second = "    |    Created at:   " . created'
-	let values = [first, second]
-
-	redir @x>>
-	echo head
-	echo pad
-	redir END
+	execute 'let first = "    |     Subdirectory:  /" . subd'
+	execute 'let second = "    |    Creation date:  " . created'
+	execute 'let third = "    |    Last Modified:  "'
+	let values = [first, second, third]
 
 	let item = len(values)
 	execute 'let i = 0'
 	while(i < item)
-		redir @x>>
 
 		let j = len(head) - len(values[i])
 		while(j > 1)
 			execute 'let values[i] = values[i] . " "'
 			let j = j - 01
 		endwhile
-
 		execute 'let values[i] = values[i] . "|"'
-		echo values[i]
-		redir END
-
+		silent call appendbufline("", linenum, values[i])
+		let linenum = linenum + 01
 		let i = i + 01
 	endwhile
-	redir @x>>
-	echo pad
-	echo end
-	echo ""
-	echo "#if !defined(" . filemacro . ")"
+	silent call appendbufline("", linenum, pad)
+	let linenum = linenum + 01
+	silent call appendbufline("", linenum, end)
+	let linenum = linenum + 01
+	silent call appendbufline("", linenum, "")
+	let linenum = linenum + 01
+	silent call appendbufline("", linenum, "#if !defined(" . filemacro . ")")
+	let linenum = linenum + 01
 
 	execute 'let i = 10'
 	while(i > 0)
-		echo ""
+		silent call appendbufline("", linenum, "")
+		let linenum = linenum + 01
 		let i = i - 01
 	endwhile
 
-	echo "#define " . filemacro
-	echo "#endif"
-	redir END
-	execute 'normal gg'
-	execute 'normal "xP'
-	execute 'normal gg'
+	silent call appendbufline("", linenum, "#define " . filemacro)
+	let linenum = linenum + 01
+	silent call appendbufline("", linenum, "#endif")
+	let linenum = linenum + 01
+	:0
 	execute 'normal dd'
-	let @x = ""
-	if(a:0 > 0)
-		echo a:1
-	endif
 endfunction
 com! -nargs=* -complete=file CNewFileTemplate call CNewFileTemplate(<f-args>)
 
