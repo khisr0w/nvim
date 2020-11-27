@@ -37,6 +37,7 @@ if has('gui_running')
 	au GUIEnter * simalt ~x
 	nnoremap <C-S> :call CompileSilent()<CR>
 	inoremap <C-S> <Esc>:wa<CR>:call CompileSilent()<CR>
+	set guifont=Consolas:h11:cANSI:qDRAFT
 endif
 
 " ============================================================================
@@ -45,13 +46,15 @@ cd ~
 cab w wa
 cab WA w
 
-"au VimEnter * jobstart(['pushd F:\dev', '&', 'escToCaps.exe', '&', 'popd'])
+au VimEnter * silent call system('pushd ' . '"' . expand("$VIMRUNTIME") . '" ' . '& start /b escToCaps.exe & popd')
+au VimLeave * silent call system('taskkill /F /IM "escToCaps.exe"')
+
 "au VimEnter * jobstart(['cmd.exe', 'ping neovim.io')
 
 tnoremap <Esc> <C-\><C-n>
 "set clipboard+=unnamedplus
 set laststatus=2
-set statusline+=%F
+"set statusline+=%F
 
 hi Pmenu guibg=#504945
 hi PmenuSel guibg=#ec524b
@@ -95,7 +98,7 @@ function! UpdateFile()
 	if(search('/\*', 'Wc') == 1)
 		if(search('\(+======.*|.*File.*Info.*|\)', 'W') == 1)
 			if(search('\(Last.*Modified.*:\)', 'W') == 5)
-				if(search('\(|.*Sayed.*Abid.*Hashimi.*,.*Copyright.*Â©.*All.*rights.*reserved.|\)', 'W') == 7)
+				if(search('\(|.*Sayed.*Abid.*Hashimi.*,.*Copyright.*©.*All.*rights.*reserved.|\)', 'W') == 7)
 					:0
 					let line = search('\(Last.*Modified.*:\)', 'W')
 					execute 'let text = "    |    Last Modified:  " . strftime("%c", localtime())'
@@ -132,7 +135,7 @@ function! CNewFileTemplate(...)
 	let pad = "    |                                                                                  |"
 	silent call appendbufline("", linenum, pad)
 	let linenum = linenum + 01
-	let end = "    +=====================| Sayed Abid Hashimi, Copyright Â© All rights reserved |======+  */"
+	let end = "    +=====================| Sayed Abid Hashimi, Copyright © All rights reserved |======+  */"
 
 	let subd = expand("%:p:h:t")
 	let created = strftime("%c", getftime(expand("%:p")))
