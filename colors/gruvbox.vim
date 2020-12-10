@@ -575,9 +575,9 @@ endif
 
 "call s:HL('Comment', s:gray, s:none, s:italicize_comments)
 "call s:HL('Todo', s:vim_fg, s:vim_bg, s:bold . s:italic)
-hi Todo		guifg=orangered guibg=yellow2
-hi Warning	guifg=white guibg=red
-hi Note		guifg=white guibg=darkgreen
+hi Todo   guifg=red guibg=NONE gui=bold,underline
+hi Warning  guifg=yellow2 gui=bold,underline
+hi Note		guifg=green gui=bold,underline
 
 call s:HL('Error', s:red, s:vim_bg, s:bold . s:inverse)
 

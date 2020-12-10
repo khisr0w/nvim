@@ -16,6 +16,9 @@ set cursorline
 set belloff=all
 set autochdir
 
+"autocmd FileType help,* wincmd L
+"au GUIEnter * simalt ~x
+
 hi Search ctermbg=white ctermfg=red
 nnoremap <silent> <Space> :nohlsearch<Bar>:echo<CR>
 
@@ -45,6 +48,7 @@ endif
 cd ~
 cab w wa
 cab WA w
+cab cmd echo system("")<Left><Left>
 
 au VimEnter * silent call system('pushd ' . '"' . expand("$VIMRUNTIME") . '" ' . '& start /b escToCaps.exe & popd')
 au VimLeave * silent call system('taskkill /F /IM "escToCaps.exe"')
@@ -54,7 +58,6 @@ au VimLeave * silent call system('taskkill /F /IM "escToCaps.exe"')
 tnoremap <Esc> <C-\><C-n>
 "set clipboard+=unnamedplus
 set laststatus=2
-"set statusline+=%F
 
 hi Pmenu guibg=#504945
 hi PmenuSel guibg=#ec524b
@@ -84,7 +87,7 @@ nnoremap <C-X> :silent !..\debug.bat<CR>
 
 "au BufWinEnter *.cpp,*.c,*.h,*.hpp,*.bat cd %:p:h | cd /
 au BufNewFile *.cpp,*.c,*.h,*.hpp,*.bat silent w | CNewFileTemplate() | cd %:p:h
-au BufWritePre *.cpp,*.c,*.h,*.hpp,*.bat call UpdateFile()
+au BufWritePost *.cpp,*.c,*.h,*.hpp,*.bat undoj | call UpdateFile()
 
 "echo bufname(1)
 
@@ -119,7 +122,7 @@ endfunction
 function! CompileSilent()
 	:wa
 	:call setqflist([], 'a', {'title' : 'MSVC Compilation'})
-	:silent cgete system('pushd "%programfiles(x86)%\Microsoft Visual Studio 14.0\VC" & vcvarsall.bat x64 & popd & ..\\build.bat')
+	:silent cgete system('..\\build.bat')
 	:silent cc 1
 	:wa
 	:cl
