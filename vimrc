@@ -86,8 +86,8 @@ nnoremap <C-X> :silent !..\debug.bat<CR>
 :nnoremap <A-s> <Esc>:wa<CR>:silent call CompileSilent()<CR><C-w>p:q<CR>:cope<CR>
 
 "au BufWinEnter *.cpp,*.c,*.h,*.hpp,*.bat cd %:p:h | cd /
-au BufNewFile *.cpp,*.c,*.h,*.hpp,*.bat silent w | CNewFileTemplate() | cd %:p:h
-"au BufWritePost *.cpp,*.c,*.h,*.hpp,*.bat undoj | call UpdateFile()
+au BufNewFile *.cpp,*.c,*.h,*.hpp silent w | CNewFileTemplate() | cd %:p:h
+au BufUnload *.cpp,*.c,*.h,*.hpp call UpdateFile()
 
 "echo bufname(1)
 
