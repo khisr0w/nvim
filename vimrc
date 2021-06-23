@@ -46,7 +46,7 @@ endif
 " ============================================================================
 
 cd ~
-cab w wa
+" cab w wa
 cab WA w
 cab cmd echo system("")<Left><Left>
 
