@@ -258,7 +258,7 @@ endif
 if !exists("c_no_c99") " ISO C99
   syn keyword	cType		_Bool bool _Complex complex _Imaginary imaginary bool32
   syn keyword	cType		int8_t int16_t int32_t int64_t int8 int16 int32 int64
-  syn keyword	cType		uint8_t uint16_t uint32_t uint64_t uint8 uint16 uint32 uint64
+  syn keyword	cType		uint8_t uint16_t uint32_t uint64_t uint8 uint16 uint32 uint64 uintptr
   if !exists("c_no_bsd")
     " These are BSD specific.
     syn keyword	cType		u_int8_t u_int16_t u_int32_t u_int64_t

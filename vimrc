@@ -35,12 +35,12 @@ if has('gui_running')
 	set guioptions-=T  "toolbar
 	set guioptions-=r  "scrollbar
 	set guioptions-=L  "scrollbar
-	set guifont=Fantasque_Sans_Mono:h12:cANSI:qDRAFT
+	"set guifont=Fantasque_Sans_Mono:h10:cANSI:qDRAFT
 	colorscheme gruvbox
 	au GUIEnter * simalt ~x
 	nnoremap <C-S> :call CompileSilent()<CR>
 	inoremap <C-S> <Esc>:wa<CR>:call CompileSilent()<CR>
-	set guifont=Consolas:h11:cANSI:qDRAFT
+	set guifont=Consolas:h10:cANSI:qDRAFT
 endif
 
 " ============================================================================
