@@ -3,13 +3,17 @@ set hlsearch
 set incsearch
 set backspace=indent,eol,start
 set nowrap
-set breakindent
+
+set breakindent showbreak=..
+set linebreak
+"set foldmethod=indent foldcolumn=4
+set tabstop=4 shiftwidth=4 expandtab
+
 set cindent
 set smartindent
-set tabstop=4
-set shiftwidth=4
+set autoindent
 set smarttab
-set softtabstop=0 noexpandtab
+"set softtabstop=0 noexpandtab
 set nu
 set relativenumber
 set cursorline
@@ -18,6 +22,7 @@ set autochdir
 
 "autocmd FileType help,* wincmd L
 "au GUIEnter * simalt ~x
+autocmd FileType make setlocal noexpandtab
 
 hi Search ctermbg=white ctermfg=red
 nnoremap <silent> <Space> :nohlsearch<Bar>:echo<CR>
@@ -40,7 +45,7 @@ if has('gui_running')
 	au GUIEnter * simalt ~x
 	nnoremap <C-S> :call CompileSilent()<CR>
 	inoremap <C-S> <Esc>:wa<CR>:call CompileSilent()<CR>
-	set guifont=Consolas:h10:cANSI:qDRAFT
+	set guifont=Consolas:h13:cANSI:qDRAFT
 endif
 
 " ============================================================================
@@ -50,8 +55,8 @@ cd ~
 cab WA w
 cab cmd echo system("")<Left><Left>
 
-au VimEnter * silent call system('pushd ' . '"' . expand("$VIMRUNTIME") . '" ' . '& start /b escToCaps.exe & popd')
-au VimLeave * silent call system('taskkill /F /IM "escToCaps.exe"')
+"au VimEnter * silent call system('pushd ' . '"' . expand("$VIMRUNTIME") . '" ' . '& start /b escToCaps.exe & popd')
+"au VimLeave * silent call system('taskkill /F /IM "escToCaps.exe"')
 
 "au VimEnter * jobstart(['cmd.exe', 'ping neovim.io')
 
@@ -86,7 +91,8 @@ nnoremap <C-X> :silent !..\debug.bat<CR>
 :nnoremap <A-s> <Esc>:wa<CR>:silent call CompileSilent()<CR><C-w>p:q<CR>:cope<CR>
 
 "au BufWinEnter *.cpp,*.c,*.h,*.hpp,*.bat cd %:p:h | cd /
-au BufNewFile *.cpp,*.c,*.h,*.hpp silent w | CNewFileTemplate() | cd %:p:h
+au BufNewFile *.h,*.hpp silent w | HeaderNewFileTemplate() | cd %:p:h
+au BufNewFile *.cpp,*.c silent w | CPPNewFileTemplate() | cd %:p:h
 au BufUnload *.cpp,*.c,*.h,*.hpp call UpdateFile()
 
 "echo bufname(1)
@@ -122,13 +128,59 @@ endfunction
 function! CompileSilent()
 	:wa
 	:call setqflist([], 'a', {'title' : 'MSVC Compilation'})
-	:silent cgete system('..\\build.bat')
+	:silent cgete system('pushd .. && make -B debug && popd')
 	:silent cc 1
 	:wa
 	:cl
 endfunction
 
-function! CNewFileTemplate(...)
+function! CPPNewFileTemplate(...)
+
+	execute 'let filemacro = toupper(expand("%:t:r")) . "_" . toupper(expand("%:e"))'
+	execute 'let linenum = 1'
+	let head = "/*  +======| File Info |===============================================================+"
+	silent call appendbufline("", linenum, head)
+	let linenum = linenum + 01
+	let pad = "    |                                                                                  |"
+	silent call appendbufline("", linenum, pad)
+	let linenum = linenum + 01
+	let end = "    +=====================| Sayed Abid Hashimi, Copyright © All rights reserved |======+  */"
+
+	let subd = expand("%:p:h:t")
+	let created = strftime("%c", getftime(expand("%:p")))
+	execute 'let first = "    |     Subdirectory:  /" . subd'
+	execute 'let second = "    |    Creation date:  " . created'
+	execute 'let third = "    |    Last Modified:  "'
+	let values = [first, second, third]
+
+	let item = len(values)
+	execute 'let i = 0'
+	while(i < item)
+
+		let j = len(head) - len(values[i])
+		while(j > 1)
+			execute 'let values[i] = values[i] . " "'
+			let j = j - 01
+		endwhile
+		execute 'let values[i] = values[i] . "|"'
+		silent call appendbufline("", linenum, values[i])
+		let linenum = linenum + 01
+		let i = i + 01
+	endwhile
+	silent call appendbufline("", linenum, pad)
+	let linenum = linenum + 01
+	silent call appendbufline("", linenum, end)
+	let linenum = linenum + 01
+	silent call appendbufline("", linenum, "")
+	let linenum = linenum + 01
+	:0
+	execute 'normal dd'
+
+endfunction
+
+com! -nargs=* -complete=file CPPNewFileTemplate call CPPNewFileTemplate(<f-args>)
+
+function! HeaderNewFileTemplate(...)
 
 	execute 'let filemacro = toupper(expand("%:t:r")) . "_" . toupper(expand("%:e"))'
 	execute 'let linenum = 1'
@@ -184,7 +236,7 @@ function! CNewFileTemplate(...)
 	:0
 	execute 'normal dd'
 endfunction
-com! -nargs=* -complete=file CNewFileTemplate call CNewFileTemplate(<f-args>)
+com! -nargs=* -complete=file HeaderNewFileTemplate call HeaderNewFileTemplate(<f-args>)
 
 function! MakeProj(...)
 	if(a:0 == 0)
