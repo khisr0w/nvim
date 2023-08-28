@@ -1,3 +1,4 @@
+vim.cmd([[
 syntax on
 set hlsearch
 set incsearch
@@ -45,7 +46,6 @@ if has('gui_running')
 	au GUIEnter * simalt ~x
 	nnoremap <C-S> :call CompileSilent()<CR>
 	inoremap <C-S> <Esc>:wa<CR>:call CompileSilent()<CR>
-	set guifont=Consolas:h13:cANSI:qDRAFT
 endif
 
 " ============================================================================
@@ -107,7 +107,7 @@ function! UpdateFile()
 	if(search('/\*', 'Wc') == 1)
 		if(search('\(+======.*|.*File.*Info.*|\)', 'W') == 1)
 			if(search('\(Last.*Modified.*:\)', 'W') == 5)
-				if(search('\(|.*Sayed.*Abid.*Hashimi.*,.*Copyright.*©.*All.*rights.*reserved.|\)', 'W') == 7)
+				if(search('\(|.*Sayed.*Abid.*Hashimi.*,.*Copyright.*Â©.*All.*rights.*reserved.|\)', 'W') == 7)
 					:0
 					let line = search('\(Last.*Modified.*:\)', 'W')
 					execute 'let text = "    |    Last Modified:  " . strftime("%c", localtime())'
@@ -122,7 +122,7 @@ function! UpdateFile()
 			endif
 		endif
 	endif
-	call setpos('.', [curpos[0], curpos[1], curpos[2], curpos[3]])
+	call setpos('.', [curpos[0], curpos[1], curpos[2], curpos[3] ])
 endfunction
 
 function! CompileSilent()
@@ -144,7 +144,7 @@ function! CPPNewFileTemplate(...)
 	let pad = "    |                                                                                  |"
 	silent call appendbufline("", linenum, pad)
 	let linenum = linenum + 01
-	let end = "    +=====================| Sayed Abid Hashimi, Copyright © All rights reserved |======+  */"
+	let end = "    +=====================| Sayed Abid Hashimi, Copyright Â© All rights reserved |======+  */"
 
 	let subd = expand("%:p:h:t")
 	let created = strftime("%c", getftime(expand("%:p")))
@@ -190,7 +190,7 @@ function! HeaderNewFileTemplate(...)
 	let pad = "    |                                                                                  |"
 	silent call appendbufline("", linenum, pad)
 	let linenum = linenum + 01
-	let end = "    +=====================| Sayed Abid Hashimi, Copyright © All rights reserved |======+  */"
+	let end = "    +=====================| Sayed Abid Hashimi, Copyright Â© All rights reserved |======+  */"
 
 	let subd = expand("%:p:h:t")
 	let created = strftime("%c", getftime(expand("%:p")))
@@ -257,43 +257,35 @@ function! MakeProj(...)
 endfunction
 com! -nargs=* -complete=file MakeProj call MakeProj(<f-args>)
 cab makeproj MakeProj
+]])
 
-"redir @x
-"echo expand("%:t:r")
-"redir END
-"redir @x>>
-"echo "_"
-"echo expand("%:e")
-"redir END
+-- vim-plug Plugins
+local Plug = vim.fn['plug#']
+vim.call('plug#begin')
 
-"function! Sp(...)
-"  if(a:0 == 0)
-"    sp
-"  else
-"    let i = a:0
-"    while(i > 0)
-"      execute 'let file = a:' . i
-"      execute 'sp ' . file
-"      let i = i - 1
-"    endwhile
-"  endif
-"endfunction
-"com! -nargs=* -complete=file Sp call Sp(<f-args>)
-"cab sp Sp
+Plug 'nvim-lua/plenary.nvim'
+Plug('nvim-telescope/telescope.nvim', {tag = '0.1.2' })
+Plug('nvim-telescope/telescope-fzf-native.nvim', { ['do'] = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' })
 
-"function! OpenFullPath()
-"	:cd /
-"	:file %:p
-"	:e %:p
-"	:cd -
-"endfunction
+vim.call('plug#end')
+-- Example Cases
+-- Plug('scrooloose/nerdtree', {on = 'NERDTreeToggle'})
+-- Plug('scrooloose/nerdtree', {on = {'NERDTreeToggle', 'NERDTree'})
+-- Plug('junegunn/fzf', {['do'] = vim.fn['fzf#install']})
 
-" Make the swap file warnings go away
-" set shortmess+=A
+-- Plug('junegunn/fzf', {
+--   ['do'] = function()
+--     vim.call('fzf#install')
+--   end
+-- })
 
-" Write full path in the buffer name, in order to make it work with MSVC
-" quickfix compilation
-"au BufReadPre *.cpp,*.c,*.h,*.hpp cd /
-"au BufReadPost *.cpp,*.c,*.h,*.hpp e %:p
-"au BufWinEnter *.cpp,*.c,*.h,*.hpp call OpenFullPath()
-""au BufAdd *.cpp,*.c,*.h,*.hpp e %:p
+-- Telescope Keymaps
+vim.g.mapleader = ','
+vim.g.maplocalleader = ','
+
+local telescope = require('telescope.builtin')
+vim.keymap.set('n', '<leader>ff', telescope.find_files, {})
+vim.keymap.set('n', '<leader>fg', telescope.live_grep, {})
+vim.keymap.set('n', '<leader>fg', telescope.grep_string, {})
+vim.keymap.set('n', '<leader>fb', telescope.buffers, {})
+vim.keymap.set('n', '<leader>fh', telescope.help_tags, {})
