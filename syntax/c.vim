@@ -249,16 +249,16 @@ if exists("c_gnu")
   syn keyword	cOperator	typeof __real__ __imag__
 endif
 syn keyword	cType		int long short char void
-syn keyword	cType		signed unsigned float double real32 float32
+syn keyword	cType		signed unsigned float double real32 float32 f32 f64
 if !exists("c_no_ansi") || exists("c_ansi_typedefs")
   syn keyword   cType		size_t ssize_t off_t wchar_t ptrdiff_t sig_atomic_t fpos_t
   syn keyword   cType		clock_t time_t va_list jmp_buf FILE DIR div_t ldiv_t
   syn keyword   cType		mbstate_t wctrans_t wint_t wctype_t
 endif
 if !exists("c_no_c99") " ISO C99
-  syn keyword	cType		_Bool bool _Complex complex _Imaginary imaginary bool32
-  syn keyword	cType		int8_t int16_t int32_t int64_t int8 int16 int32 int64
-  syn keyword	cType		uint8_t uint16_t uint32_t uint64_t uint8 uint16 uint32 uint64 uintptr
+  syn keyword	cType		_Bool bool _Complex complex _Imaginary imaginary
+  syn keyword	cType		int8_t int16_t int32_t int64_t int8 int16 int32 int64 i8 i16 i32 i64
+  syn keyword	cType		uint8_t uint16_t uint32_t uint64_t uint8 uint16 uint32 uint64 uintptr u8 u16 u32 u64
   if !exists("c_no_bsd")
     " These are BSD specific.
     syn keyword	cType		u_int8_t u_int16_t u_int32_t u_int64_t
@@ -448,6 +448,16 @@ if exists("c_curly_error")
 else
   exec "syn sync ccomment cComment minlines=" . b:c_minlines
 endif
+
+" Highlight function names
+if get(g:, 'c_function_highlight', 1)
+    syn match cUserFunction "\<\h\w*\ze\_s\{-}(\%(\*\h\w*)\_s\{-}(\)\@!"
+    syn match cUserFunctionPointer "\%((\s*\*\s*\)\@<=\h\w*\ze\s*)\_s\{-}(.*)"
+    hi def link cUserFunction Function
+    hi def link cUserFunctionPointer Function
+endif
+
+syn match ifdefZero "\<#if\s\+0\>"
 
 " Define the default highlighting.
 " Only used when an item doesn't have highlighting yet

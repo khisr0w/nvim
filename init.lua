@@ -1,4 +1,5 @@
 vim.cmd([[
+let g:c_function_highlight = 1
 syntax on
 set hlsearch
 set incsearch
@@ -36,6 +37,7 @@ inoremap { {}<left>
 inoremap {<CR> {<CR>}<ESC>O
 inoremap {;<CR> {<CR>};<ESC>O
 
+colorscheme gruvbox
 if has('gui_running')
 	set guioptions-=m  "menu bar
 	set guioptions-=T  "toolbar
@@ -107,7 +109,7 @@ function! UpdateFile()
 	if(search('/\*', 'Wc') == 1)
 		if(search('\(+======.*|.*File.*Info.*|\)', 'W') == 1)
 			if(search('\(Last.*Modified.*:\)', 'W') == 5)
-				if(search('\(|.*Sayed.*Abid.*Hashimi.*,.*Copyright.*©.*All.*rights.*reserved.|\)', 'W') == 7)
+				if(search('\(|.*Copyright.*©.*Sayed.*Abid.*Hashimi.|\)', 'W') == 7)
 					:0
 					let line = search('\(Last.*Modified.*:\)', 'W')
 					execute 'let text = "    |    Last Modified:  " . strftime("%c", localtime())'
@@ -144,7 +146,7 @@ function! CPPNewFileTemplate(...)
 	let pad = "    |                                                                                  |"
 	silent call appendbufline("", linenum, pad)
 	let linenum = linenum + 01
-	let end = "    +=====================| Sayed Abid Hashimi, Copyright © All rights reserved |======+  */"
+	let end = "    +======================================| Copyright © Sayed Abid Hashimi |==========+  */"
 
 	let subd = expand("%:p:h:t")
 	let created = strftime("%c", getftime(expand("%:p")))
@@ -190,7 +192,7 @@ function! HeaderNewFileTemplate(...)
 	let pad = "    |                                                                                  |"
 	silent call appendbufline("", linenum, pad)
 	let linenum = linenum + 01
-	let end = "    +=====================| Sayed Abid Hashimi, Copyright © All rights reserved |======+  */"
+	let end = "    +======================================| Copyright © Sayed Abid Hashimi |==========+  */"
 
 	let subd = expand("%:p:h:t")
 	let created = strftime("%c", getftime(expand("%:p")))
@@ -286,6 +288,8 @@ vim.g.maplocalleader = ','
 local telescope = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', telescope.find_files, {})
 vim.keymap.set('n', '<leader>fg', telescope.live_grep, {})
-vim.keymap.set('n', '<leader>fg', telescope.grep_string, {})
+vim.keymap.set('n', '<leader>fs', telescope.grep_string, {})
 vim.keymap.set('n', '<leader>fb', telescope.buffers, {})
 vim.keymap.set('n', '<leader>fh', telescope.help_tags, {})
+
+vim.api.nvim_set_var('terminal_emulator', 'cmd')

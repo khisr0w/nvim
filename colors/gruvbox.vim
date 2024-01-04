@@ -575,9 +575,9 @@ endif
 
 "call s:HL('Comment', s:gray, s:none, s:italicize_comments)
 "call s:HL('Todo', s:vim_fg, s:vim_bg, s:bold . s:italic)
-hi Todo   guifg=red guibg=NONE gui=bold,underline
-hi Warning  guifg=yellow2 gui=bold,underline
-hi Note		guifg=green gui=bold,underline
+hi Todo   ctermfg=red ctermbg=NONE cterm=bold,underline guifg=red guibg=NONE gui=bold,underline
+hi Warning  ctermfg=yellow cterm=bold,underline guifg=yellow2 gui=bold,underline
+hi Note		ctermfg=green cterm=bold,underline guifg=green gui=bold,underline
 
 call s:HL('Error', s:red, s:vim_bg, s:bold . s:inverse)
 
@@ -598,19 +598,21 @@ hi! link Keyword GruvboxRed
 
 " Variable name
 hi! link Identifier GruvboxBlue
+
 " Function name
 hi! link Function GruvboxGreenBold
 
 " Generic preprocessor
-hi! link PreProc GruvboxAqua
+hi! link PreProc GruvboxBlue
+
 " Preprocessor #include
-hi! link Include GruvboxAqua
+hi! link Include GruvboxBlue
 " Preprocessor #define
-hi! link Define GruvboxAqua
+hi! link Define GruvboxBlue
 " Same as Define
-hi! link Macro GruvboxAqua
+hi! link Macro GruvboxBlue
 " Preprocessor #if, #else, #endif, etc.
-hi! link PreCondit GruvboxAqua
+hi! link PreCondit GruvboxBlue
 
 " Generic constant
 hi! link Constant GruvboxPurple
