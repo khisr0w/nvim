@@ -26,6 +26,9 @@ set autochdir
 "au GUIEnter * simalt ~x
 autocmd FileType make setlocal noexpandtab
 
+autocmd BufNewFile,BufRead *.vs,*.fs set ft=glsl
+"autocmd BufWritePost *.c,*.h system('pushd .. && ctags && popd')
+
 hi Search ctermbg=white ctermfg=red
 nnoremap <silent> <Space> :nohlsearch<Bar>:echo<CR>
 
@@ -266,6 +269,7 @@ local Plug = vim.fn['plug#']
 vim.call('plug#begin')
 
 Plug 'nvim-lua/plenary.nvim'
+Plug 'tikhomirov/vim-glsl'
 Plug('nvim-telescope/telescope.nvim', {tag = '0.1.2' })
 Plug('nvim-telescope/telescope-fzf-native.nvim', { ['do'] = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' })
 
@@ -293,3 +297,22 @@ vim.keymap.set('n', '<leader>fb', telescope.buffers, {})
 vim.keymap.set('n', '<leader>fh', telescope.help_tags, {})
 
 vim.api.nvim_set_var('terminal_emulator', 'cmd')
+
+
+-- Update tags on nvim open and file save (if ctags in PATH)
+if vim.fn.executable("ctags") == 1 then
+    local file_pattern = {"*.c", "*.cpp", "*.h", "*.hpp"}
+    local function ctags_func()
+        vim.fn.system("pushd .. && ctags && popd")
+    end
+    vim.api.nvim_create_autocmd("VimEnter", {
+        pattern = file_pattern,
+        callback = ctags_func
+    })
+    vim.api.nvim_create_autocmd("BufWritePost", {
+        pattern = file_pattern,
+        callback = ctags_func
+    })
+else
+    print("ctags not in PATH. Disable tag generation.")
+end

@@ -251,7 +251,7 @@ endif
 syn keyword	cType		int long short char void
 syn keyword	cType		signed unsigned float double real32 float32 f32 f64
 if !exists("c_no_ansi") || exists("c_ansi_typedefs")
-  syn keyword   cType		size_t ssize_t off_t wchar_t ptrdiff_t sig_atomic_t fpos_t
+  syn keyword   cType		size_t usize ssize_t off_t wchar_t ptrdiff_t sig_atomic_t fpos_t
   syn keyword   cType		clock_t time_t va_list jmp_buf FILE DIR div_t ldiv_t
   syn keyword   cType		mbstate_t wctrans_t wint_t wctype_t
 endif
