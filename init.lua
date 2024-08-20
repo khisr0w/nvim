@@ -15,9 +15,11 @@ set cindent
 set smartindent
 set autoindent
 set smarttab
+set ignorecase
+set smartcase
 "set softtabstop=0 noexpandtab
-set nu
-set relativenumber
+set nonu
+set norelativenumber
 set cursorline
 set belloff=all
 set autochdir
@@ -41,17 +43,17 @@ inoremap {<CR> {<CR>}<ESC>O
 inoremap {;<CR> {<CR>};<ESC>O
 
 colorscheme gruvbox
-if has('gui_running')
-	set guioptions-=m  "menu bar
-	set guioptions-=T  "toolbar
-	set guioptions-=r  "scrollbar
-	set guioptions-=L  "scrollbar
-	"set guifont=Fantasque_Sans_Mono:h10:cANSI:qDRAFT
-	colorscheme gruvbox
-	au GUIEnter * simalt ~x
-	nnoremap <C-S> :call CompileSilent()<CR>
-	inoremap <C-S> <Esc>:wa<CR>:call CompileSilent()<CR>
-endif
+"if has('gui_running')
+"	set guioptions-=m  "menu bar
+"	set guioptions-=T  "toolbar
+"	set guioptions-=r  "scrollbar
+"	set guioptions-=L  "scrollbar
+"	set guifont=Fantasque_Sans_Mono:h10:cANSI:qDRAFT
+"	colorscheme gruvbox
+"	au GUIEnter * simalt ~x
+"	nnoremap <C-S> :call CompileSilent()<CR>
+"	inoremap <C-S> <Esc>:wa<CR>:call CompileSilent()<CR>
+"endif
 
 " ============================================================================
 
@@ -93,7 +95,9 @@ nnoremap <C-X> :silent !..\debug.bat<CR>
 " key mapping for the quickfix jumps after compilation
 :nnoremap <A-n> :cn<CR>
 :nnoremap <A-b> :cN<CR>
-:nnoremap <A-s> <Esc>:wa<CR>:silent call CompileSilent()<CR><C-w>p:q<CR>:cope<CR>
+
+nnoremap <A-s> <Esc>:wa<CR>:call CompileSilentAndRun()<CR>
+":nnoremap <A-s> <Esc>:wa<CR>:silent call CompileSilentAndRun()<CR><C-w>p:q<CR>:cope<CR>
 
 "au BufWinEnter *.cpp,*.c,*.h,*.hpp,*.bat cd %:p:h | cd /
 au BufNewFile *.h,*.hpp silent w | HeaderNewFileTemplate() | cd %:p:h
@@ -130,6 +134,14 @@ function! UpdateFile()
 	call setpos('.', [curpos[0], curpos[1], curpos[2], curpos[3] ])
 endfunction
 
+function! CompileSilentAndRun()
+	:wa
+	:call setqflist([], 'a', {'title' : 'MSVC Compilation'})
+	:silent cgete system('pushd .. && make -B debug && popd && pushd ..\bin\debug && viz.exe && popd')
+	:silent cc 1
+	:wa
+	:cl
+endfunction
 function! CompileSilent()
 	:wa
 	:call setqflist([], 'a', {'title' : 'MSVC Compilation'})
@@ -264,16 +276,74 @@ com! -nargs=* -complete=file MakeProj call MakeProj(<f-args>)
 cab makeproj MakeProj
 ]])
 
+function font_size_step(font_str, offset)
+    start_pos = string.find(font_str, ":")
+    end_pos = string.find(font_str, ":", start_pos+1)
+    prefix = string.sub(font_str, 0, start_pos+1)
+    font_size = tonumber(string.sub(font_str, start_pos+2, end_pos-1)) + offset
+    suffix = string.sub(font_str, end_pos)
+
+    vim.opt.guifont = prefix .. font_size ..suffix
+end
+
+-- Neovide configs
+if vim.g.neovide then
+    vim.opt.guifont = "JetBrainsMono Nerd Font:h10:b,i,u"
+    vim.g.neovide_scale_factor = 1.0875
+    vim.g.neovide_cursor_animation_length = 0.01
+    vim.g.neovide_scroll_animation_length = 0.1
+    vim.g.neovide_hide_mouse_when_typing = true
+
+    function toggle_fullscreen()
+        vim.g.neovide_fullscreen = not vim.g.neovide_fullscreen
+    end
+    vim.api.nvim_set_keymap(
+        "n", "<F11>", 
+        ":lua toggle_fullscreen()<CR>",
+        {noremap = true, silent = true})
+    vim.api.nvim_set_keymap(
+        "n", "<C-->", 
+        ":lua font_size_step(vim.opt.guifont._value, -1)<CR>",
+        {noremap = true, silent = true})
+    vim.api.nvim_set_keymap(
+        "n", "<C-=>", 
+        ":lua font_size_step(vim.opt.guifont._value, 1)<CR>",
+        {noremap = true, silent = true})
+end
+
 -- vim-plug Plugins
 local Plug = vim.fn['plug#']
 vim.call('plug#begin')
 
+-- Helper library for convenient routines
 Plug 'nvim-lua/plenary.nvim'
+
+-- GLSL Sytax highlighting
 Plug 'tikhomirov/vim-glsl'
+
+-- Telescope for nvim use of ripgrep
 Plug('nvim-telescope/telescope.nvim', {tag = '0.1.2' })
 Plug('nvim-telescope/telescope-fzf-native.nvim', { ['do'] = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' })
 
+-- Jai Syntax highlighting
+Plug 'rluba/jai.vim'
+
+-- Snippets 
+-- Plug 'sirver/ultisnips'
+
 vim.call('plug#end')
+
+
+vim.cmd([[
+let g:UltiSnipsSnippetDirectories = ["C:/Users/Khisrow/AppData/Local/nvim"]
+let g:UltiSnipsExpandTrigger = '<tab>'
+let g:UltiSnipsJumpForwardTrigger = '<tab>'
+let g:UltiSnipsJumpBackwardTrigger = '<s-tab>'
+let g:UltiSnipsNoPythonWarning = 1
+let g:UltiSnipsAutoTrigger = 0
+let g:UltiSnipsUsePythonVersion = ''
+]])
+
 -- Example Cases
 -- Plug('scrooloose/nerdtree', {on = 'NERDTreeToggle'})
 -- Plug('scrooloose/nerdtree', {on = {'NERDTreeToggle', 'NERDTree'})
@@ -301,6 +371,7 @@ vim.api.nvim_set_var('terminal_emulator', 'cmd')
 
 -- Update tags on nvim open and file save (if ctags in PATH)
 if vim.fn.executable("ctags") == 1 then
+    vim.cmd("cd E:\\")
     local file_pattern = {"*.c", "*.cpp", "*.h", "*.hpp"}
     local function ctags_func()
         vim.fn.system("pushd .. && ctags && popd")
