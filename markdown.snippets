@@ -1,9 +1,15 @@
 snippet li "limit"
 \lim_{${1:x} \to ${2:\infty}} $0
 endsnippet
+snippet $li "limit"
+$\lim_{${1:x} \to ${2:\infty}} $0
+endsnippet
 
 snippet su "sum"
 \sum_{${1:x=1}}^{${2:n}} $0
+endsnippet
+snippet $su "sum"
+$\sum_{${1:x=1}}^{${2:n}} $0
 endsnippet
 
 snippet in "integral"
@@ -11,7 +17,13 @@ snippet in "integral"
 endsnippet
 
 snippet ov "over"
-{$1 \over $0}
+{$1 \over $2}$3
+endsnippet
+snippet {ov "over"
+{{$1 \over $2}$3
+endsnippet
+snippet {{ov "over"
+{{{$1 \over $2}$3
 endsnippet
 
 snippet bl "block"
@@ -32,6 +44,16 @@ snippet or "orange"
 {{<orange \`$1\` \`$2\`>}} $0
 endsnippet
 
-snippet $ "math"
-$ $0 $
+snippet ve "vert"
+\bigg\vert_ $1^$2
 endsnippet
+
+snippet $ "math"
+$$0$
+endsnippet
+
+snippet fig "math"
+{{<figure \`/images/posts/$1\` \`$2\`>}} $3
+endsnippet
+
+

@@ -1,5 +1,6 @@
 vim.cmd([[
 let g:c_function_highlight = 1
+let $TERM = 'conemu'
 syntax on
 set hlsearch
 set incsearch
@@ -60,7 +61,7 @@ colorscheme gruvbox
 cd ~
 " cab w wa
 cab WA w
-cab cmd echo system("")<Left><Left>
+"cab cmd echo system("")<Left><Left>
 
 "au VimEnter * silent call system('pushd ' . '"' . expand("$VIMRUNTIME") . '" ' . '& start /b escToCaps.exe & popd')
 "au VimLeave * silent call system('taskkill /F /IM "escToCaps.exe"')
@@ -136,15 +137,15 @@ endfunction
 
 function! CompileSilentAndRun()
 	:wa
-	:call setqflist([], 'a', {'title' : 'MSVC Compilation'})
-	:silent cgete system('pushd .. && make -B debug && popd && pushd ..\bin\debug && viz.exe && popd')
+	:call setqflist([], 'a', {'title' : 'Compilation and Run'})
+	:silent cgete system('pushd .. && make -B run && popd')
 	:silent cc 1
 	:wa
 	:cl
 endfunction
 function! CompileSilent()
 	:wa
-	:call setqflist([], 'a', {'title' : 'MSVC Compilation'})
+	:call setqflist([], 'a', {'title' : 'Compilation'})
 	:silent cgete system('pushd .. && make -B debug && popd')
 	:silent cc 1
 	:wa
@@ -288,9 +289,9 @@ end
 
 -- Neovide configs
 if vim.g.neovide then
-    vim.opt.guifont = "JetBrainsMono Nerd Font:h10:b,i,u"
+    vim.opt.guifont = "Iosevka:h11:b,i,u"
     vim.g.neovide_scale_factor = 1.0875
-    vim.g.neovide_cursor_animation_length = 0.01
+    vim.g.neovide_cursor_animation_length = 0.0
     vim.g.neovide_scroll_animation_length = 0.1
     vim.g.neovide_hide_mouse_when_typing = true
 
@@ -311,6 +312,15 @@ if vim.g.neovide then
         {noremap = true, silent = true})
 end
 
+local function check_cmd_flag(flag)
+    for _, arg in ipairs(vim.v.argv) do
+        if arg == flag then
+            return true
+        end
+    end
+    return false
+end
+
 -- vim-plug Plugins
 local Plug = vim.fn['plug#']
 vim.call('plug#begin')
@@ -329,11 +339,13 @@ Plug('nvim-telescope/telescope-fzf-native.nvim', { ['do'] = 'cmake -S. -Bbuild -
 Plug 'rluba/jai.vim'
 
 -- Snippets 
--- Plug 'sirver/ultisnips'
+if check_cmd_flag("snip") then
+    Plug 'sirver/ultisnips'
+end
 
 vim.call('plug#end')
 
-
+-- Ulti Snips configuration
 vim.cmd([[
 let g:UltiSnipsSnippetDirectories = ["C:/Users/Khisrow/AppData/Local/nvim"]
 let g:UltiSnipsExpandTrigger = '<tab>'
@@ -355,7 +367,7 @@ let g:UltiSnipsUsePythonVersion = ''
 --   end
 -- })
 
--- Telescope Keymaps
+-- Telescope configuration
 vim.g.mapleader = ','
 vim.g.maplocalleader = ','
 
@@ -368,12 +380,53 @@ vim.keymap.set('n', '<leader>fh', telescope.help_tags, {})
 
 vim.api.nvim_set_var('terminal_emulator', 'cmd')
 
+-- Call a command-line function asynchronously
+local function run_command_async(command, args, callback)
+    local stdout = vim.loop.new_pipe(false)
+    local stderr = vim.loop.new_pipe(false)
+    local handle
+
+    local function on_exit(code, signal)
+        stdout:close()
+        stderr:close()
+        handle:close()
+        if callback then
+            callback(code, signal)
+        end
+    end
+
+    handle = vim.loop.spawn(
+        command,
+        {
+            args = args,
+            stdio = {nil, stdout, stderr},
+        },
+        on_exit
+    )
+
+    vim.loop.read_start(stdout, vim.schedule_wrap(function(err, data)
+        -- if err then
+        --     print("Error reading stdout:", err)
+        -- elseif data then
+        --     print("stdout:", data)
+        -- end
+    end))
+
+    vim.loop.read_start(stderr, vim.schedule_wrap(function(err, data)
+        if err then
+            print("Error reading stderr:", err)
+        elseif data then
+            print("stderr:", data)
+        end
+    end))
+end
 
 -- Update tags on nvim open and file save (if ctags in PATH)
 if vim.fn.executable("ctags") == 1 then
     vim.cmd("cd E:\\")
     local file_pattern = {"*.c", "*.cpp", "*.h", "*.hpp"}
     local function ctags_func()
+        -- run_command_async("pushd .. && ctags && popd", {}, function(code, signal) end)
         vim.fn.system("pushd .. && ctags && popd")
     end
     vim.api.nvim_create_autocmd("VimEnter", {
@@ -387,3 +440,43 @@ if vim.fn.executable("ctags") == 1 then
 else
     print("ctags not in PATH. Disable tag generation.")
 end
+
+-- Compile latex to PDF on save asynchronously
+vim.api.nvim_create_autocmd("BufWritePost", {
+    pattern = {"*.tex"},
+    callback = function()
+        local buffer = vim.api.nvim_get_current_buf()
+        local file_name = vim.api.nvim_buf_get_name(buffer)
+        run_command_async("latexmk", {"-pdf", "-outdir=build", file_name},
+            function(code, signal)
+                if code == 0 then
+                    print("PDF compiled successfully.")
+                else
+                    print("Failed PDF compilation with code:", code, "signal:", signal)
+                end
+            end
+        )
+    end
+})
+
+-- Key mapping for comment categories
+vim.api.nvim_create_autocmd("BufEnter", {
+    pattern = {"*.c", "*.cpp", "*.h", "*.hpp"},
+    callback = function()
+        vim.api.nvim_set_keymap("i", "<C-j>", "/* NOTE(abid):  */<Esc>hhi", { noremap = true, silent = true })
+        vim.api.nvim_set_keymap("n", "<C-j>", "O/* NOTE(abid):  */<Esc>hhi", { noremap = true, silent = true })
+        vim.api.nvim_set_keymap("i", "<C-k>", "/* TODO(abid):  */<Esc>hhi", { noremap = true, silent = true })
+        vim.api.nvim_set_keymap("n", "<C-k>", "O/* TODO(abid):  */<Esc>hhi", { noremap = true, silent = true })
+        vim.api.nvim_set_keymap("i", "<C-l>", "/* WARNING(abid):  */<Esc>hhi", { noremap = true, silent = true })
+        vim.api.nvim_set_keymap("n", "<C-l>", "O/* WARNING(abid):  */<Esc>hhi", { noremap = true, silent = true })
+    end
+})
+
+-- Insert date for comments
+vim.api.nvim_create_user_command("InsertDate", function()
+    local date = os.date(" - %d.%b.%Y")
+    vim.api.nvim_put({date}, 'c', true, true)
+    vim.cmd("normal " .. #date .. "h")
+end, {})
+
+vim.api.nvim_set_keymap("i", "<C-u>", "<Esc>:InsertDate<CR>i", { noremap = true, silent = true })

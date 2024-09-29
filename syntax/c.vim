@@ -34,10 +34,11 @@ syn keyword	cNote		contained NOTE
 " It's easy to accidentally add a space after a backslash that was intended
 " for line continuation.  Some compilers allow it, which makes it
 " unpredictable and should be avoided.
+syn match       cCommentNote "@\<\w\+\>" contained display
 syn match	cBadContinuation contained "\\\s\+$"
 
 " cCommentGroup allows adding matches for special things in comments
-syn cluster	cCommentGroup	contains=cTodo,cBadContinuation,cWarning,cNote
+syn cluster	cCommentGroup	contains=cTodo,cCommentNote,cBadContinuation,cWarning,cNote
 
 " String and Character constants
 " Highlight special characters (those which have a backslash) differently
@@ -507,6 +508,7 @@ hi def link cString		String
 hi def link cComment		Comment
 hi def link cSpecial		SpecialChar
 hi def link cTodo		Todo
+hi def link cCommentNote	Todo
 hi def link cWarning		Warning
 hi def link cNote		Note
 hi def link cBadContinuation	Error
