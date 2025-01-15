@@ -59,7 +59,7 @@ colorscheme gruvbox
 " ============================================================================
 
 cd ~
-" cab w wa
+cab scratch E:/den/content/posts/scratch.md
 cab WA w
 "cab cmd echo system("")<Left><Left>
 
@@ -138,7 +138,8 @@ endfunction
 function! CompileSilentAndRun()
 	:wa
 	:call setqflist([], 'a', {'title' : 'Compilation and Run'})
-	:silent cgete system('pushd .. && make -B run && popd')
+	":silent cgete system('pushd .. && make -B run && popd')
+	:silent cgete system('pushd .. && cd binary && cmake --build . && cmake --build . --target exec && popd')
 	:silent cc 1
 	:wa
 	:cl
@@ -146,7 +147,8 @@ endfunction
 function! CompileSilent()
 	:wa
 	:call setqflist([], 'a', {'title' : 'Compilation'})
-	:silent cgete system('pushd .. && make -B debug && popd')
+	":silent cgete system('pushd .. && make -B debug && popd')
+	:silent cgete system('pushd .. && cd binary && cmake --build . && popd')
 	:silent cc 1
 	:wa
 	:cl
@@ -162,7 +164,7 @@ function! CPPNewFileTemplate(...)
 	let pad = "    |                                                                                  |"
 	silent call appendbufline("", linenum, pad)
 	let linenum = linenum + 01
-	let end = "    +======================================| Copyright © Sayed Abid Hashimi |==========+  */"
+	let end = "    +==================================================| Sayed Abid Hashimi |==========+  */"
 
 	let subd = expand("%:p:h:t")
 	let created = strftime("%c", getftime(expand("%:p")))
@@ -459,9 +461,9 @@ vim.api.nvim_create_autocmd("BufWritePost", {
     end
 })
 
--- Key mapping for comment categories
+-- Key mapping for C-style comment categories
 vim.api.nvim_create_autocmd("BufEnter", {
-    pattern = {"*.c", "*.cpp", "*.h", "*.hpp"},
+    pattern = {"*.c", "*.cpp", "*.h", "*.hpp", "*.js", "*.css"},
     callback = function()
         vim.api.nvim_set_keymap("i", "<C-j>", "/* NOTE(abid):  */<Esc>hhi", { noremap = true, silent = true })
         vim.api.nvim_set_keymap("n", "<C-j>", "O/* NOTE(abid):  */<Esc>hhi", { noremap = true, silent = true })
@@ -472,11 +474,62 @@ vim.api.nvim_create_autocmd("BufEnter", {
     end
 })
 
--- Insert date for comments
-vim.api.nvim_create_user_command("InsertDate", function()
+local set_single_line_comment = function(prefix)
+    vim.api.nvim_set_keymap("i", "<C-j>", prefix .. " NOTE(abid): ", { noremap = true, silent = true })
+    vim.api.nvim_set_keymap("i", "<C-k>", prefix .. " TODO(abid): ", { noremap = true, silent = true })
+    vim.api.nvim_set_keymap("i", "<C-l>", prefix .. " WARNING(abid): ", { noremap = true, silent = true })
+    vim.api.nvim_set_keymap("n", "<C-k>", "O" .. prefix .. " TODO(abid): ", { noremap = true, silent = true })
+    vim.api.nvim_set_keymap("n", "<C-j>", "O" .. prefix .. " NOTE(abid): ", { noremap = true, silent = true })
+    vim.api.nvim_set_keymap("n", "<C-l>", "O" .. prefix .. " WARNING(abid): ", { noremap = true, silent = true })
+end
+
+-- Key mapping for Python comment categories
+vim.api.nvim_create_autocmd("BufEnter", {
+    pattern = {"*.py", "*.sh", "*.bash"},
+    callback = function()
+        set_single_line_comment("#")
+    end
+})
+
+-- Key mapping for Lua comment categories
+vim.api.nvim_create_autocmd("BufEnter", {
+    pattern = {"*.lua"},
+    callback = function()
+        set_single_line_comment("--")
+    end
+})
+
+-- Key mapping for batch file comment
+vim.api.nvim_create_autocmd("BufEnter", {
+    pattern = {"*.bat", "*.batch"},
+    callback = function()
+        set_single_line_comment("rem")
+    end
+})
+
+-- Insert date and time
+vim.api.nvim_create_user_command("Date", function()
     local date = os.date(" - %d.%b.%Y")
     vim.api.nvim_put({date}, 'c', true, true)
     vim.cmd("normal " .. #date .. "h")
 end, {})
+vim.api.nvim_create_user_command("Time", function()
+    local time = os.date("*t")
+    local time_string = time.hour .. ":" .. time.min
+    vim.api.nvim_put({time_string}, 'c', true, true)
+    vim.cmd("normal " .. #time_string .. "h")
+end, {})
 
-vim.api.nvim_set_keymap("i", "<C-u>", "<Esc>:InsertDate<CR>i", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("i", "<C-u>", "<Esc>:Date<CR>i", { noremap = true, silent = true })
+
+-- Generate CMake build
+vim.api.nvim_create_user_command("CMake", function()
+    local output = vim.fn.system(
+        'pushd .. && ' ..
+        '(if not exist binary ( mkdir binary ) else ( del /Q binary )) && ' ..
+        'cd binary && ' ..
+        'cmake -GNinja .. && ' ..
+        'popd'
+    )
+    print(output)
+end, {})
