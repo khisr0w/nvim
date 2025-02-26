@@ -443,6 +443,15 @@ else
     print("ctags not in PATH. Disable tag generation.")
 end
 
+function string_split(str, delim)
+    local t = {}
+    for substr in str.gmatch(str, "([^" .. delim .. "]+)") do
+        table.insert(t, substr)
+    end
+
+    return t
+end
+
 -- Compile latex to PDF on save asynchronously
 vim.api.nvim_create_autocmd("BufWritePost", {
     pattern = {"*.tex"},
@@ -454,7 +463,18 @@ vim.api.nvim_create_autocmd("BufWritePost", {
                 if code == 0 then
                     print("PDF compiled successfully.")
                 else
-                    print("Failed PDF compilation with code:", code, "signal:", signal)
+                    print("Failed PDF compilation with code:", code, "signal:", signal, "retrying...")
+                    local separator = package.config:sub(1, 1)
+                    local name_without_path = string_split(file_name, separator)
+                    local name_without_path = name_without_path[#name_without_path]
+                    local aux_to_delete = vim.loop.cwd() .. separator .. "build".. separator .. string_split(name_without_path, ".")[1] .. ".aux"
+                    local success = os.remove(aux_to_delete)
+                    if success then
+                        print("Deleted", aux_to_delete)
+                        run_command_async("latexmk", {"-pdf", "-outdir=build", file_name}, nil)
+                    else
+                        print("Failed to delete", aux_to_delete)
+                    end
                 end
             end
         )
