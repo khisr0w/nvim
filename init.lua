@@ -458,26 +458,29 @@ vim.api.nvim_create_autocmd("BufWritePost", {
     callback = function()
         local buffer = vim.api.nvim_get_current_buf()
         local file_name = vim.api.nvim_buf_get_name(buffer)
-        run_command_async("latexmk", {"-pdf", "-outdir=build", file_name},
-            function(code, signal)
-                if code == 0 then
-                    print("PDF compiled successfully.")
+        run_command_async("latexmk", {"-pdf", "-outdir=build", file_name}, function(code, signal)
+            if code == 0 then
+                print("PDF compiled successfully.")
+            else
+                -- NOTE(abid): Delete the .aux file which causes failures sometimes.
+                local separator = package.config:sub(1, 1)
+                local name_without_path = string_split(file_name, separator)
+                local name_without_path = name_without_path[#name_without_path]
+                local aux_to_delete = vim.loop.cwd() .. separator .. "build".. separator .. string_split(name_without_path, ".")[1] .. ".aux"
+                local success = os.remove(aux_to_delete)
+                if success then
+                    run_command_async("latexmk", {"-pdf", "-outdir=build", file_name}, function(code, signal) 
+                        if code == 0 then
+                            print("PDF compiled successfully.")
+                        else
+                            print("Failed PDF compilation with code:", code, "signal:", signal)
+                        end
+                    end)
                 else
-                    print("Failed PDF compilation with code:", code, "signal:", signal, "retrying...")
-                    local separator = package.config:sub(1, 1)
-                    local name_without_path = string_split(file_name, separator)
-                    local name_without_path = name_without_path[#name_without_path]
-                    local aux_to_delete = vim.loop.cwd() .. separator .. "build".. separator .. string_split(name_without_path, ".")[1] .. ".aux"
-                    local success = os.remove(aux_to_delete)
-                    if success then
-                        print("Deleted", aux_to_delete)
-                        run_command_async("latexmk", {"-pdf", "-outdir=build", file_name}, nil)
-                    else
-                        print("Failed to delete", aux_to_delete)
-                    end
+                    print("Failed to delete .aux file")
                 end
             end
-        )
+        end)
     end
 })
 
