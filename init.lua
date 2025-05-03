@@ -23,7 +23,7 @@ set nonu
 set norelativenumber
 set cursorline
 set belloff=all
-set autochdir
+"set autochdir
 
 "autocmd FileType help,* wincmd L
 "au GUIEnter * simalt ~x
@@ -144,7 +144,7 @@ function! CompileSilent()
 	:wa
 	:call setqflist([], 'a', {'title' : 'Compilation'})
 	":silent cgete system('pushd .. && make -B debug && popd')
-	:silent cgete system('pushd .. && cd binary && cmake --build . && popd')
+	:silent cgete system('pushd .. && cmake --build binary && popd')
 	:silent cc 1
 	:wa
 	:cl
@@ -453,7 +453,8 @@ vim.api.nvim_create_autocmd("BufWritePost", {
     pattern = {"*.tex"},
     callback = function()
         local buffer = vim.api.nvim_get_current_buf()
-        local file_name = vim.api.nvim_buf_get_name(buffer)
+        -- TODO(abid): Make sure dynamically set this some way. For now, main.tex is assumed
+        local file_name = "main.tex" -- vim.api.nvim_buf_get_name(buffer)
         run_command_async("latexmk", {"-pdf", "-outdir=build", file_name}, function(code, signal)
             if code == 0 then
                 print("PDF compiled successfully.")
