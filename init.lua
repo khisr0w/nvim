@@ -1,6 +1,5 @@
 vim.cmd([[
 let g:c_function_highlight = 1
-let $TERM = 'conemu'
 syntax on
 set hlsearch
 set incsearch
@@ -103,7 +102,7 @@ au BufUnload *.cpp,*.c,*.h,*.hpp call UpdateFile()
 
 "echo bufname(1)
 
-:set makeprg=cmd 
+:set makeprg=cmd
 :set splitbelow
 :set splitright
 
@@ -448,39 +447,6 @@ function string_split(str, delim)
     return t
 end
 
--- Compile latex to PDF on save asynchronously
-vim.api.nvim_create_autocmd("BufWritePost", {
-    pattern = {"*.tex"},
-    callback = function()
-        local buffer = vim.api.nvim_get_current_buf()
-        -- TODO(abid): Make sure dynamically set this some way. For now, main.tex is assumed
-        local file_name = "main.tex" -- vim.api.nvim_buf_get_name(buffer)
-        run_command_async("latexmk", {"-pdf", "-outdir=build", file_name}, function(code, signal)
-            if code == 0 then
-                print("PDF compiled successfully.")
-            else
-                -- NOTE(abid): Delete the .aux file which causes failures sometimes.
-                local separator = package.config:sub(1, 1)
-                local name_without_path = string_split(file_name, separator)
-                local name_without_path = name_without_path[#name_without_path]
-                local aux_to_delete = vim.loop.cwd() .. separator .. "build".. separator .. string_split(name_without_path, ".")[1] .. ".aux"
-                local success = os.remove(aux_to_delete)
-                if success then
-                    run_command_async("latexmk", {"-pdf", "-outdir=build", file_name}, function(code, signal) 
-                        if code == 0 then
-                            print("PDF compiled successfully.")
-                        else
-                            print("Failed PDF compilation with code:", code, "signal:", signal)
-                        end
-                    end)
-                else
-                    print("Failed to delete .aux file")
-                end
-            end
-        end)
-    end
-})
-
 -- Key mapping for C-style comment categories
 vim.api.nvim_create_autocmd("BufEnter", {
     pattern = {"*.c", "*.cpp", "*.h", "*.hpp", "*.js", "*.css"},
@@ -524,6 +490,14 @@ vim.api.nvim_create_autocmd("BufEnter", {
     pattern = {"*.bat", "*.batch"},
     callback = function()
         set_single_line_comment("rem")
+    end
+})
+
+-- Key mapping for latex file(s) comment
+vim.api.nvim_create_autocmd("BufEnter", {
+    pattern = {"*.tex"},
+    callback = function()
+        set_single_line_comment("%")
     end
 })
 
@@ -604,23 +578,6 @@ vim.api.nvim_create_autocmd("BufEnter", {
     end
 })
 
-vim.api.nvim_create_autocmd("BufWritePost", {
-    pattern = {"*.tex"},
-    callback = function()
-        local buffer = vim.api.nvim_get_current_buf()
-        local file_name = vim.api.nvim_buf_get_name(buffer)
-        run_command_async("latexmk", {"-pdf", "-outdir=build", file_name},
-            function(code, signal)
-                if code == 0 then
-                    print("PDF compiled successfully.")
-                else
-                    print("Failed PDF compilation with code:", code, "signal:", signal)
-                end
-            end
-        )
-    end
-})
-
 local set_comment_multi_line = function(start, end_, ...)
     vim.api.nvim_set_keymap("i", "<C-j>", start .. " NOTE(abid): ".. end_ .."<Esc>hhi", { noremap = true, silent = true })
     vim.api.nvim_set_keymap("i", "<C-k>", start .. " TODO(abid): ".. end_ .."<Esc>hhi", { noremap = true, silent = true })
@@ -670,3 +627,5 @@ vim.api.nvim_create_autocmd("BufEnter", {
         set_comment_single_line("rem")
     end
 })
+
+vim.o.shell = "E:\\vendors\\nu\\nu"
