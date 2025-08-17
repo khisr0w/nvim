@@ -69,22 +69,37 @@ vim.api.nvim_create_autocmd("BufEnter", {
     end
 })
 
-local comment_multi_line_set = function(start, end_, ...)
-    vim.api.nvim_set_keymap("i", "<C-j>", start .. " NOTE(abid): ".. end_ .."<Esc>hhi", { noremap = true, silent = true })
-    vim.api.nvim_set_keymap("i", "<C-k>", start .. " TODO(abid): ".. end_ .."<Esc>hhi", { noremap = true, silent = true })
-    vim.api.nvim_set_keymap("i", "<C-l>", start .. " WARNING(abid): ".. end_ .."<Esc>hhi", { noremap = true, silent = true })
-    vim.api.nvim_set_keymap("n", "<C-k>", "O".. start .." TODO(abid): ".. end_ .."<Esc>hhi", { noremap = true, silent = true })
-    vim.api.nvim_set_keymap("n", "<C-j>", "O".. start .." NOTE(abid): ".. end_ .."<Esc>hhi", { noremap = true, silent = true })
-    vim.api.nvim_set_keymap("n", "<C-l>", "O".. start .." WARNING(abid): ".. end_ .."<Esc>hhi", { noremap = true, silent = true })
+local comment_multi_line_set = function(start, end_)
+    modes = {"i", "n"}
+    cats = {
+        {name = " NOTE(abid):  ", keymap = "<C-j>"},
+        {name = " TODO(abid):  ", keymap = "<C-k>"},
+        {name = " WARNING(abid):  ", keymap = "<C-l>"},
+    }
+
+    for _, mode in ipairs(modes) do
+        for _, cat in ipairs(cats) do
+            vim.api.nvim_set_keymap(
+                mode, cat.keymap,
+                start .. cat.name .. end_ .."<Esc>" .. string.rep("h", #end_) .. "i",
+                { noremap = true, silent = true }
+            )
+        end
+    end
 end
 
 local comment_single_line_set = function(prefix)
-    vim.api.nvim_set_keymap("i", "<C-j>", prefix .. " NOTE(abid): ", { noremap = true, silent = true })
-    vim.api.nvim_set_keymap("i", "<C-k>", prefix .. " TODO(abid): ", { noremap = true, silent = true })
-    vim.api.nvim_set_keymap("i", "<C-l>", prefix .. " WARNING(abid): ", { noremap = true, silent = true })
-    vim.api.nvim_set_keymap("n", "<C-k>", "O" .. prefix .. " TODO(abid): ", { noremap = true, silent = true })
-    vim.api.nvim_set_keymap("n", "<C-j>", "O" .. prefix .. " NOTE(abid): ", { noremap = true, silent = true })
-    vim.api.nvim_set_keymap("n", "<C-l>", "O" .. prefix .. " WARNING(abid): ", { noremap = true, silent = true })
+    modes = {"i", "n"}
+    cats = {
+        {name = " NOTE(abid):  ", keymap = "<C-j>"},
+        {name = " TODO(abid):  ", keymap = "<C-k>"},
+        {name = " WARNING(abid):  ", keymap = "<C-l>"},
+    }
+    for _, mode in ipairs(modes) do
+        for _, cat in ipairs(cats) do
+            vim.api.nvim_set_keymap(mode, cat.keymap, prefix .. cat.name, { noremap = true, silent = true })
+        end
+    end
 end
 
 -- Key mapping for C-style comment categories
