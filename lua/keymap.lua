@@ -70,7 +70,10 @@ vim.api.nvim_create_autocmd("BufEnter", {
 })
 
 local comment_multi_line_set = function(start, end_)
-    modes = {"i", "n"}
+    modes = {
+        {name = "i", enter = ""},
+        {name = "n", enter = "O"},
+    }
     cats = {
         {name = " NOTE(abid):  ", keymap = "<C-j>"},
         {name = " TODO(abid):  ", keymap = "<C-k>"},
@@ -80,8 +83,8 @@ local comment_multi_line_set = function(start, end_)
     for _, mode in ipairs(modes) do
         for _, cat in ipairs(cats) do
             vim.api.nvim_set_keymap(
-                mode, cat.keymap,
-                start .. cat.name .. end_ .."<Esc>" .. string.rep("h", #end_) .. "i",
+                mode.name, cat.keymap,
+                mode.enter .. start .. cat.name .. end_ .."<Esc>" .. string.rep("h", #end_) .. "i",
                 { noremap = true, silent = true }
             )
         end
