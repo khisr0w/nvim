@@ -10,6 +10,6 @@ if platform.name == "windows" then
     vim.g.UltiSnipsAutoTrigger = 0
     vim.g.UltiSnipsUsePythonVersion = ''
 elseif platform.name == "linux" or platform.name == "linux" then
-    vim.alert("Ultisnips not set up for linux/macos")
+    vim.notify("Ultisnips not set up for linux/macos")
 end
 

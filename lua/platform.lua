@@ -21,7 +21,7 @@ elseif vim.fn.has("wsl") == 1 then
     M.shell_path = "/bin/bash"
     M.home = "~"
 else
-    return vim.alert("Unknown platform.")
+    return vim.notify("Unknown platform.")
 end
 
 return M
