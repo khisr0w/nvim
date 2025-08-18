@@ -45,9 +45,14 @@ if platform.name == "darwin" then
     vim.api.nvim_set_keymap("i", "˚", "<Esc><C-w>k", { noremap = true, silent = true })
     vim.api.nvim_set_keymap("i", "¬", "<Esc><C-w>l", { noremap = true, silent = true })
     vim.api.nvim_set_keymap("i", "<C-h>", "<Esc>:Date<CR>i", { noremap = true, silent = true })
--- :nnoremap <A-h> <C-w>h
--- :nnoremap <A-j> <C-w>j
--- TODO(abid): Add the windows/linux keybindings from above here.
+
+    -- Keymap for the quickfix next and back
+    vim.api.nvim_set_keymap("n", "µ", "cn<CR>", { noremap = true, silent = true })
+    vim.api.nvim_set_keymap("n", "∫", "cN<CR>", { noremap = true, silent = true })
+else
+    -- Keymap for the quickfix next and back
+    vim.api.nvim_set_keymap("n", "<A-n>", ":cn<CR>", { noremap = true, silent = true })
+    vim.api.nvim_set_keymap("n", "<A-b>", ":cN<CR>", { noremap = true, silent = true })
 end
 
 -- NOTE(abid): C/CPP compile

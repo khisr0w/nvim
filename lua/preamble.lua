@@ -110,8 +110,7 @@ endfunction
 function! CompileSilentAndRun()
 	:wa
 	:call setqflist([], 'a', {'title' : 'Compilation and Run'})
-	":silent cgete system('pushd .. && make -B run && popd')
-	:silent cgete system('pushd .. && cd binary && cmake --build . && cmake --build . --target exec && popd')
+    :silent cgete system('cd ..; cmake -GNinja -Bbuild Texec; cd -')
 	:silent cc 1
 	:wa
 	:cl
@@ -119,8 +118,7 @@ endfunction
 function! CompileSilent()
 	:wa
 	:call setqflist([], 'a', {'title' : 'Compilation'})
-	":silent cgete system('pushd .. && make -B debug && popd')
-	:silent cgete system('pushd .. && cmake --build binary && popd')
+    :silent cgete system('cd ..; cmake -GNinja -Bbuild; cmake --build build; cd -')
 	:silent cc 1
 	:wa
 	:cl
@@ -252,4 +250,17 @@ cab makeproj MakeProj
 ]])
 
 platform = require("platform")
-vim.o.shell = platform.shell_path
+
+vim.opt.sh = "nu"
+
+if platform.name == "windows" then
+    vim.opt.shellcmdflag = "-c"
+    vim.opt.shellquote = ""
+    vim.opt.shellxquote = ""
+
+    vim.cmd.cabbrev('scratch E:/den/content/posts/scratch.md')
+elseif platform.name == "darwin" then
+    vim.cmd.cabbrev('scratch ~/private/den/content/posts/scratch.md')
+elseif platform.name == "linux" then
+    vim.cmd.cabbrev('scratch ~/den/content/posts/scratch.md')
+end
