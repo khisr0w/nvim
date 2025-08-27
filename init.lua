@@ -5,4 +5,3 @@ require("plugin.ulti_snips")
 require("neovide")
 require("command")
 require("keymap")
-
