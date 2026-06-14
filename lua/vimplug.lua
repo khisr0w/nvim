@@ -15,7 +15,6 @@ local Plug = vim.fn['plug#']
 vim.call('plug#begin')
 -------------- START --------------
 
-
 -- Helper library for convenient routines
 Plug 'nvim-lua/plenary.nvim'
 

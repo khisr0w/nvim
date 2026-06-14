@@ -59,8 +59,8 @@ end
 vim.api.nvim_create_autocmd("BufEnter", {
     pattern = {"*.c", "*.cpp", "*.h", "*.hpp"},
     callback = function()
-        vim.api.nvim_set_keymap("i", "<C-s>", "<Esc>:wa<CR>:call CompileSilent()<CR>", { noremap = true, silent = true })
-        vim.api.nvim_set_keymap("n", "<C-s>", ":wa<CR>:call CompileSilent()<CR>", { noremap = true, silent = true })
+        vim.api.nvim_set_keymap("i", "<C-s>", "<Esc>:wa<CR>:Build<CR>", { noremap = true, silent = true })
+        vim.api.nvim_set_keymap("n", "<C-s>", ":wa<CR>:Build<CR>", { noremap = true, silent = true })
     end
 })
 

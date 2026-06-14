@@ -43,7 +43,6 @@ inoremap {<CR> {<CR>}<ESC>O
 inoremap {;<CR> {<CR>};<ESC>O
 
 colorscheme gruvbox
-cd ~
 cab scratch E:/den/content/posts/scratch.md
 cab WA w
 
@@ -69,7 +68,7 @@ nnoremap <C-X> :silent !..\debug.bat<CR>
 :nnoremap µ :cn<CR>
 :nnoremap ∫ :cN<CR>
 
-nnoremap <A-s> <Esc>:wa<CR>:call CompileSilentAndRun()<CR>
+nnoremap <A-s> <Esc>:wa<CR>:call kompileSilentAndRun()<CR>
 ":nnoremap <A-s> <Esc>:wa<CR>:silent call CompileSilentAndRun()<CR><C-w>p:q<CR>:cope<CR>
 
 "au BufWinEnter *.cpp,*.c,*.h,*.hpp,*.bat cd %:p:h | cd /
@@ -118,7 +117,7 @@ endfunction
 function! CompileSilent()
 	:wa
 	:call setqflist([], 'a', {'title' : 'Compilation'})
-    :silent cgete system('cd ..; cmake -GNinja -Bbuild; cmake --build build; cd -')
+    :silent cgete system('build.exe')
 	:silent cc 1
 	:wa
 	:cl
@@ -251,7 +250,10 @@ cab makeproj MakeProj
 
 platform = require("platform")
 
+vim.opt.encoding = "utf-8"
+vim.opt.fileencodings = "utf-8,latin1"
 vim.opt.sh = "nu"
+vim.g.c_syntax_for_h = 1 -- .h header files should be considered c-lang, not cpp.
 
 if platform.name == "windows" then
     vim.opt.shellcmdflag = "-c"
