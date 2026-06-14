@@ -33,5 +33,12 @@ if utils.check_args("snip") then
     Plug 'sirver/ultisnips'
 end
 
+-- oil.nvim (file explorer)
+Plug 'stevearc/oil.nvim'
+
+
+-- fugitive (git plugin)
+Plug 'tpope/vim-fugitive'
+
 -------------- END --------------
 vim.call('plug#end')

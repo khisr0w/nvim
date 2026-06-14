@@ -20,6 +20,8 @@ platform = require("platform")
 --     print("ctags not in PATH. Disable tag generation.")
 -- end
 
+-- Double escape to exit terminal
+vim.cmd([[tnoremap <Esc><Esc> <C-\><C-n>]])
 
 -- Insert date and time
 vim.api.nvim_create_user_command("Date", function()
@@ -149,3 +151,6 @@ vim.api.nvim_create_autocmd("BufEnter", {
         set_single_line_comment("%")
     end
 })
+
+-- git diff on a file
+vim.api.nvim_set_keymap("n", "<leader>d", ":Gdiffsplit<CR>", {noremap = true, silent = true})

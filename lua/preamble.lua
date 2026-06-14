@@ -46,7 +46,6 @@ colorscheme gruvbox
 cab scratch E:/den/content/posts/scratch.md
 cab WA w
 
-tnoremap <Esc> <C-\><C-n>
 "set clipboard+=unnamedplus
 set laststatus=2
 
@@ -266,3 +265,9 @@ elseif platform.name == "darwin" then
 elseif platform.name == "linux" then
     vim.cmd.cabbrev('scratch ~/den/content/posts/scratch.md')
 end
+vim.o.shell = platform.shell_path
+vim.opt.timeoutlen = 200 -- Time to wait for second key when sequential keymapping is done. e.g. <Esc><Esc>
+vim.g.netrw_preview = 1 -- Open vertically when previewing
+vim.g.mapleader = ','
+vim.g.maplocalleader = ','
+vim.opt.diffopt:append("vertical")
