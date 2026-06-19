@@ -271,3 +271,9 @@ vim.g.netrw_preview = 1 -- Open vertically when previewing
 vim.g.mapleader = ','
 vim.g.maplocalleader = ','
 vim.opt.diffopt:append("vertical")
+
+-- Use a translucent-style diff that doesn't kill syntax colors
+vim.api.nvim_set_hl(0, 'DiffAdd',    { bg = '#1a3a1a' })  -- dark green tint
+vim.api.nvim_set_hl(0, 'DiffDelete', { bg = '#3a1a1a', fg = '#5a3a3a' })  -- dark red tint
+vim.api.nvim_set_hl(0, 'DiffChange', { bg = '#1a1a3a' })  -- dark blue tint
+vim.api.nvim_set_hl(0, 'DiffText',   { bg = '#2a2a5a', bold = true })
